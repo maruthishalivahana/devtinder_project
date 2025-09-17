@@ -1,21 +1,35 @@
 
-
-const user = require("../models/user")
+const bcrypt = require("bcrypt")
+const user = require("../models/user");
+const { validateSignupData } = require("../utils/validation");
 const userRegister = async (req, res) => {
-    const { firstName, lastName, email, password, age, gender } = req.body;
-    const newUser = new user({
-        firstName,
-        lastName,
-        email,
-        password,
-        age,
-        gender
+    try {
 
-    })
-    await newUser.save();
-    res.status(201).json({
-        message: "user sucessfully registered"
-    })
+        // validateSignupData(req)
+        const { firstName, lastName, email, password } = req.body;
+
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        console.log(hashedPassword)
+
+        const newUser = new user({
+            firstName,
+            lastName,
+            email,
+            password: hashedPassword,
+
+
+        })
+
+        await newUser.save();
+        res.status(201).json({
+            message: "user sucessfully registered"
+        })
+    } catch (error) {
+        res.status(400).json({
+            message: "somthing went wrong" + error
+        })
+    }
 }
 
 
@@ -52,10 +66,16 @@ const getuserbyemail = async (req, res) => {
 }
 
 const getbyUser = async (req, res) => {
-    const { id } = req.params;
-    const dbId = await user.findById(id);
-    if (dbId) {
-        res.status(200).json(dbId)
+    try {
+        const { id } = req.params;
+        const dbId = await user.findById(id);
+        if (dbId) {
+            res.status(200).json(dbId)
+        }
+    } catch (error) {
+        res.json({
+            message: error
+        })
     }
 }
 
@@ -86,13 +106,22 @@ const deleteUser = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-    const { id } = req.params;
+
     try {
+        const { id } = req.params;
+        const data = req.body
+
+        const allowedFields = ["firstName", "lastName", "age", "gender", "skills", "photourl", "about"];
+        const isvalid = Object.keys(data).every(k => {
+            return allowedFields.includes(k)
+        })
+        if (!isvalid) {
+            res.status(400).json({
+                message: "invalid fields"
+            })
+        }
         const updateduser = await user.findByIdAndUpdate(
-            id,
-            {
-                $set: { email: "kummarivarshithkumar@gmail.com" }
-            }, { new: true })
+            id, data, { new: true })
         if (!updateduser) {
             res.status(404).json({
                 message: "user not found can not update the user details please try again"
@@ -103,10 +132,9 @@ const updateUser = async (req, res) => {
                 user: updateduser
             })
         }
-        // await updateduser.save();
 
     } catch (err) {
-
+        res.json(err)
     }
 
 }

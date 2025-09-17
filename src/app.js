@@ -19,7 +19,7 @@ app.get('/feed', authController.getFeed)
 app.get('/user', authController.getuserbyemail)
 app.get('/user/:id', authController.getbyUser)
 app.delete('/deleteuser/:id', authController.deleteUser);
-app.put('/updateuser/:id', authController.updateUser)
+app.patch('/updateuser/:id', authController.updateUser)
 
 
 
