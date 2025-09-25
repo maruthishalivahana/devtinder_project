@@ -1,6 +1,7 @@
 
 const bcrypt = require("bcrypt")
 const user = require("../models/user");
+const jwt = require("jsonwebtoken");
 const { validateSignupData } = require("../utils/validation");
 const userRegister = async (req, res) => {
     try {
@@ -32,118 +33,71 @@ const userRegister = async (req, res) => {
     }
 }
 
+const JSON_WEB_TOKEN = "654183449a53ee7ba1a6e8f89f0cb3666e90ea8ac671c6c3a4614e69e4ee33f3"
 
 const userLoign = async (req, res) => {
-    const { email, password } = req.body;
-    const userdata = await user.findOne({ email, password });
-    if (!userdata) {
-        res.status(404).json({
-            message: "user not found !"
-        })
-    }
-    if (userdata.password !== password) {
-        res.status(401).json({
-            message: " invalid cridentials"
-        })
-    }
-    res.status(200).json({
-        message: "user login sucessfully"
-    })
-}
-
-const getFeed = async (req, res) => {
-    const feedData = await user.find();
-    res.status(200).json(feedData)
-}
-
-
-const getuserbyemail = async (req, res) => {
-    const email = req.body.email;
-    const emaildB = await user.findOne({ email: email });
-    if (emaildB) {
-        res.status(200).json(emaildB)
-    }
-}
-
-const getbyUser = async (req, res) => {
     try {
-        const { id } = req.params;
-        const dbId = await user.findById(id);
-        if (dbId) {
-            res.status(200).json(dbId)
-        }
-    } catch (error) {
-        res.json({
-            message: error
-        })
-    }
-}
-
-
-const deleteUser = async (req, res) => {
-
-    const { id } = req.params;
-    try {
-        const userdata = await user.findByIdAndDelete(id);
+        const { email, password } = req.body;
+        const userdata = await user.findOne({ email: email });
         if (!userdata) {
-            res.status(404).json({
-                message: "user not fond!"
+            throw new Error("invalid cridentials")
+        }
+        const ispasswordValid = await bcrypt.compare(password, userdata.password)
+
+        if (ispasswordValid) {
+
+            const token = await jwt.sign({ id: userdata._id, }, JSON_WEB_TOKEN)
+
+            res.cookie("token", token)
+            res.status(200).json({
+                token,
+                message: "user login sucessfully"
             })
         } else {
-            res.status(200).json({
-                message: `${id} user deleted`,
-                user: userdata
-            })
+            throw new Error(" invalid cridentials")
         }
 
-    } catch (err) {
-        res.status(400).json({
-            message: "somting went wrong"
+    } catch (error) {
+        res.status(500).json({
+            message: "somthing went wrong!" + error
         })
-
+    }
+}
+const profile = async (req, res) => {
+    const users = req.User
+    if (!users) {
+        res.status(401).send("user not found please login again")
     }
 
+    res.status(200).json({
+        message: "user profile",
+        user: users
+    })
+
 }
-
-const updateUser = async (req, res) => {
-
+const sendConnectionRequest = async (req, res) => {
     try {
-        const { id } = req.params;
-        const data = req.body
-
-        const allowedFields = ["firstName", "lastName", "age", "gender", "skills", "photourl", "about"];
-        const isvalid = Object.keys(data).every(k => {
-            return allowedFields.includes(k)
+        res.status(200).json({
+            message: "connection request sent",
+            user: req.user
         })
-        if (!isvalid) {
-            res.status(400).json({
-                message: "invalid fields"
-            })
-        }
-        const updateduser = await user.findByIdAndUpdate(
-            id, data, { new: true })
-        if (!updateduser) {
-            res.status(404).json({
-                message: "user not found can not update the user details please try again"
-            })
-        } else {
-            res.status(200).json({
-                message: `${id} id updated sucessfully`,
-                user: updateduser
-            })
-        }
 
-    } catch (err) {
-        res.json(err)
+
+    } catch (error) {
+        res.status(500).json({
+            message: "somthing went wrong!" + error
+        })
     }
-
 }
+
 module.exports = {
     userRegister,
     userLoign,
-    getFeed,
-    getuserbyemail,
-    getbyUser,
-    deleteUser,
-    updateUser
+    // getFeed,
+    // getuserbyemail,
+    // getbyUser,
+    // deleteUser,
+    // updateUser,
+    profile,
+    sendConnectionRequest
 }

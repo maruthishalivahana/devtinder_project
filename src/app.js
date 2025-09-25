@@ -1,8 +1,12 @@
 const express = require("express")
 const connectDB = require("./config/Database.js");
 const authController = require("./controllers/auth.controller.js")
+const { authMiddleware } = require("./middlewares/auth.middleware.js")
+const sendConnectionRequest = require("./controllers/auth.controller.js")
+const cookieParser = require("cookie-parser");
 const app = express();
 app.use(express.json())
+app.use(cookieParser());
 const port = 3000;
 connectDB().then(() => {
     console.log("Database connected successfully")
@@ -15,11 +19,13 @@ connectDB().then(() => {
 
 app.post('/register', authController.userRegister)
 app.post('/login', authController.userLoign)
-app.get('/feed', authController.getFeed)
-app.get('/user', authController.getuserbyemail)
-app.get('/user/:id', authController.getbyUser)
-app.delete('/deleteuser/:id', authController.deleteUser);
-app.patch('/updateuser/:id', authController.updateUser)
+// app.get('/feed', authController.getFeed)
+// app.get('/user', authController.getuserbyemail)
+// app.get('/user/:id', authController.getbyUser)
+// app.delete('/deleteuser/:id', authController.deleteUser);
+// app.patch('/updateuser/:id', authController.updateUser)
+app.get('/profile', authMiddleware, authController.profile)
+app.post('/sendConnectionRequest', authMiddleware, authController.sendConnectionRequest)
 
 
 
