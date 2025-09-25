@@ -1,12 +1,21 @@
 const express = require("express")
 const connectDB = require("./config/Database.js");
-const authController = require("./controllers/auth.controller.js")
 const { authMiddleware } = require("./middlewares/auth.middleware.js")
-const sendConnectionRequest = require("./controllers/auth.controller.js")
+const { authRouter } = require("./routes/routes.auth.js")
+const { profileRouter } = require("./routes/route.profile.js")
+const { requestRouter } = require("./routes/route.request.js")
 const cookieParser = require("cookie-parser");
 const app = express();
+
+// middlewares that are used in the app
 app.use(express.json())
 app.use(cookieParser());
+app.use(authMiddleware)
+
+//routers that are used in the app
+app.use('/', authRouter)
+app.use('/', profileRouter)
+app.use('/', requestRouter)
 const port = 3000;
 connectDB().then(() => {
     console.log("Database connected successfully")
@@ -17,15 +26,6 @@ connectDB().then(() => {
     console.log("Database connection failed", err)
 })
 
-app.post('/register', authController.userRegister)
-app.post('/login', authController.userLoign)
-// app.get('/feed', authController.getFeed)
-// app.get('/user', authController.getuserbyemail)
-// app.get('/user/:id', authController.getbyUser)
-// app.delete('/deleteuser/:id', authController.deleteUser);
-// app.patch('/updateuser/:id', authController.updateUser)
-app.get('/profile', authMiddleware, authController.profile)
-app.post('/sendConnectionRequest', authMiddleware, authController.sendConnectionRequest)
 
 
 

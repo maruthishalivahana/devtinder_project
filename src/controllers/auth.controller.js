@@ -33,20 +33,20 @@ const userRegister = async (req, res) => {
     }
 }
 
-const JSON_WEB_TOKEN = "654183449a53ee7ba1a6e8f89f0cb3666e90ea8ac671c6c3a4614e69e4ee33f3"
 
-const userLoign = async (req, res) => {
+
+const userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
         const userdata = await user.findOne({ email: email });
         if (!userdata) {
             throw new Error("invalid cridentials")
         }
-        const ispasswordValid = await bcrypt.compare(password, userdata.password)
+        const ispasswordValid = await userdata.validatepassword(password)
 
         if (ispasswordValid) {
 
-            const token = await jwt.sign({ id: userdata._id, }, JSON_WEB_TOKEN)
+            const token = await userdata.getJWT();
 
             res.cookie("token", token)
             res.status(200).json({
@@ -63,26 +63,11 @@ const userLoign = async (req, res) => {
         })
     }
 }
-const profile = async (req, res) => {
-    const users = req.User
-    if (!users) {
-        res.status(401).send("user not found please login again")
-    }
 
-    res.status(200).json({
-        message: "user profile",
-        user: users
-    })
 
-}
-const sendConnectionRequest = async (req, res) => {
+const userLogout = async (req, res) => {
     try {
-        res.status(200).json({
-            message: "connection request sent",
-            user: req.user
-        })
-
-
+        res.send('logout')
     } catch (error) {
         res.status(500).json({
             message: "somthing went wrong!" + error
@@ -92,12 +77,6 @@ const sendConnectionRequest = async (req, res) => {
 
 module.exports = {
     userRegister,
-    userLoign,
-    // getFeed,
-    // getuserbyemail,
-    // getbyUser,
-    // deleteUser,
-    // updateUser,
-    profile,
-    sendConnectionRequest
+    userLogin,
+    userLogout,
 }
