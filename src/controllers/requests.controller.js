@@ -7,7 +7,7 @@ const sendConnectionRequest = async (req, res) => {
         const sender = req.User;
         if (!sender) {
             return res.status(401).json({
-                message: "user not found"
+                message: " sender user not found"
             })
         }
         const reciver = await User.findById(reciverid);
