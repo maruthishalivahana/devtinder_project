@@ -7,7 +7,7 @@ const userRegister = async (req, res) => {
     try {
 
         // validateSignupData(req)
-        const { firstName, lastName, email, password } = req.body;
+        const { firstName, lastName, email, password, photourl, age, skills, gender } = req.body;
 
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -18,6 +18,10 @@ const userRegister = async (req, res) => {
             lastName,
             email,
             password: hashedPassword,
+            photourl,
+            age,
+            skills,
+            gender
 
 
         })
@@ -67,7 +71,11 @@ const userLogin = async (req, res) => {
 
 const userLogout = async (req, res) => {
     try {
-        res.send('logout')
+
+        res.clearCookie("token")
+        res.status(200).json({
+            message: "user logout sucessfully"
+        })
     } catch (error) {
         res.status(500).json({
             message: "somthing went wrong!" + error

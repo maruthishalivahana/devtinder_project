@@ -10,8 +10,6 @@ const app = express();
 // middlewares that are used in the app
 app.use(express.json())
 app.use(cookieParser());
-app.use(authMiddleware)
-
 //routers that are used in the app
 app.use('/', authRouter)
 app.use('/', profileRouter)

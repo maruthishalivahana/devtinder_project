@@ -47,7 +47,7 @@ const authMiddleware = async (req, res, next) => {
         const { token } = cookies;
         // validate the token if the token is not present send a response to login first
         if (!token) {
-            res.status(401).send("please login first")
+            return res.status(401).send("please login first")
         }
         //if the token is present  verify the token
         const verifyuser = jwt.verify(token, JSON_WEB_TOKEN)
@@ -57,7 +57,7 @@ const authMiddleware = async (req, res, next) => {
         const users = await User.findById(id)
         // if the user is not present send a response to login again
         if (!users) {
-            res.status(401).send("user not found please login again")
+            return res.status(401).send("user not found please login again")
 
         }
         // if the user is present attach the user to the request object
@@ -65,7 +65,7 @@ const authMiddleware = async (req, res, next) => {
         // call the next middleware or router
         next();
     } catch (error) {
-        res.status(500).send("internal server error")
+        return res.status(500).send("internal server error")
 
     }
 
