@@ -64,8 +64,10 @@ const getConncetionsRequests = async (req, res) => {
 const getFeed = async (req, res) => {
     try {
         const loginUser = req.User;
-        const page = req.query.page
-        const limit = req.query.limit
+        const page = parseInt(req.query.page) || 1
+        let limit = parseInt(req.query.limit) || 10
+        limit = limit > 50 ? 50 : limit
+
         const skip = (page - 1) * limit
 
         const conncetionRequests = await ConnectionRequestModel.find({
