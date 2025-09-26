@@ -1,6 +1,6 @@
 
 const ConnectionRequestModel = require("../models/connectionRequest")
-const { express } = require("express");
+const { express, request } = require("express");
 const { validate } = require("../models/user");
 const { validateConnectionRequest } = require("../utils/validation");
 
@@ -17,7 +17,7 @@ const sendConnectionRequest = async (req, res) => {
             })
         }
 
-        const connectionRequest = new ConnectionRequestModel({
+        const connectionRequest = await new ConnectionRequestModel({
             fromUserId,
             toUserId,
             status,
@@ -35,7 +35,46 @@ const sendConnectionRequest = async (req, res) => {
     }
 }
 
+const reciveConncetionRequest = async (req, res) => {
+    try {
+
+        const loginUser = req.User
+        const { status, requestId } = req.params
+        const allowedStatus = ["accepted", "reject"];
+        if (!allowedStatus.includes(status)) {
+            return res.status(401).json({
+                message: "the status is not allowed "
+            })
+        }
+        const Request = await ConnectionRequestModel.findOneAndUpdate({
+            _id: requestId,
+            toUserId: loginUser,
+            status: "interested"
+        }, { status }, { new: true })
+        // Request.status = status
+        // const data = await Request.save();
+
+        if (!Request) {
+            return res.status(401).json({
+                message: "connection request not fond"
+            })
+        }
+
+        return res.status(200).json({
+            message: "request " + status + " sucessfully",
+            Request
+        })
+
+    } catch (error) {
+
+        return res.status(500).json({
+            message: "somthing went wrong!" + error.message
+        })
+    }
+}
+
 
 module.exports = {
-    sendConnectionRequest
+    sendConnectionRequest,
+    reciveConncetionRequest
 }
