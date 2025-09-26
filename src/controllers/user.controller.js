@@ -2,7 +2,7 @@
 
 const ConnectionRequestModel = require('../models/connectionRequest')
 
-
+const User = require('../models/user')
 
 const getConncetions = async (req, res) => {
     try {
@@ -26,14 +26,14 @@ const getConncetions = async (req, res) => {
             }
             return conn.fromUserId
         })
-        res.status(200).json({
+        return res.status(200).json({
             message: "your conncetions!",
             // conncetions,
             data
         })
 
     } catch (error) {
-        res.status(500).json({
+        return res.status(500).json({
             messasge: "something went worng" + error.message
         })
     }
@@ -45,7 +45,7 @@ const getConncetionsRequests = async (req, res) => {
             toUserId: loginUser,
             status: "interested"
         }).populate("fromUserId", "firstName lastName gender age skills photourl");
-        res.status(200).json({
+        return res.status(200).json({
             messasge: "conncetion data",
             connectionsRequests
 
@@ -58,8 +58,51 @@ const getConncetionsRequests = async (req, res) => {
 }
 
 
+const getFeed = async (req, res) => {
+    try {
+        const loginUser = req.User;
+
+        const conncetionRequests = await ConnectionRequestModel.find({
+            $or: [
+                {
+                    fromUserId: loginUser._id,
+                },
+                {
+                    toUserId: loginUser._id,
+                }
+
+            ]
+        }).select("fromUserId toUserId")
+
+        const hidefeed = new Set();
+
+        conncetionRequests.forEach((req) => {
+            hidefeed.add(req.fromUserId.toString())
+            hidefeed.add(req.toUserId.toString())
+        })
+
+        const feed = await User.find({
+            $and: [
+                { _id: { $nin: Array.from(hidefeed) } },
+                { _id: { $ne: loginUser._id } }
+            ]
+
+        }).select("firstName lastName age gender skills photourl")
+
+        return res.status(200).json({
+            message: "your feed",
+            feed
+        })
+
+    } catch (error) {
+
+    }
+}
+
+
 module.exports = {
     getConncetionsRequests,
-    getConncetions
+    getConncetions,
+    getFeed
 
 }
