@@ -38,13 +38,17 @@ const userschema = new mongoose.Schema({
 
     }, gender: {
         type: String,
+        enum: {
+            values: ["male", "female", "others"],
+            message: "{VALUE} is not supported"
+        },
 
-        validate: {
-            validator: function (v) {
-                return v === "male" || v === "female";
-            },
-            message: "Gender must be either male or female"
-        }
+        // validate: {
+        //     validator: function (v) {
+        //         return v === "male" || v === "female";
+        //     },
+        //     message: "Gender must be either male or female"
+        // }
     },
     skills: {
         type: [String],
