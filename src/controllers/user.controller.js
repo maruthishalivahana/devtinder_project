@@ -7,6 +7,9 @@ const User = require('../models/user')
 const getConncetions = async (req, res) => {
     try {
         const loginUser = req.User;
+
+
+
         const conncetions = await ConnectionRequestModel.find({
             $or: [
                 {
@@ -61,6 +64,9 @@ const getConncetionsRequests = async (req, res) => {
 const getFeed = async (req, res) => {
     try {
         const loginUser = req.User;
+        const page = req.query.page
+        const limit = req.query.limit
+        const skip = (page - 1) * limit
 
         const conncetionRequests = await ConnectionRequestModel.find({
             $or: [
@@ -87,7 +93,7 @@ const getFeed = async (req, res) => {
                 { _id: { $ne: loginUser._id } }
             ]
 
-        }).select("firstName lastName age gender skills photourl")
+        }).select("firstName lastName age gender skills photourl").skip(skip).limit(limit)
 
         return res.status(200).json({
             message: "your feed",
