@@ -18,8 +18,8 @@ const getConncetions = async (req, res) => {
                 { fromUserId: loginUser, status: "accepted" }
             ]
 
-        }).populate("fromUserId", "firstName lastName")
-            .populate("toUserId", "firstName lastName")
+        }).populate("fromUserId", "firstName lastName about photourl age gender skills")
+            .populate("toUserId", "firstName lastName about photourl age gender skills")
 
         const data = conncetions.map((conn) => {
 

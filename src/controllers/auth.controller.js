@@ -27,9 +27,14 @@ const userRegister = async (req, res) => {
 
         })
 
-        await newUser.save();
+        const savedUser = await newUser.save();
+        const token = await savedUser.getJWT();
+
+        res.cookie("token", token)
         res.status(201).json({
-            message: "user sucessfully registered"
+            message: "user sucessfully registered",
+            data: savedUser
+
         })
     } catch (error) {
         res.status(400).json({
