@@ -7,7 +7,7 @@ const userRegister = async (req, res) => {
     try {
 
         // validateSignupData(req)
-        const { firstName, lastName, email, password, photourl, age, skills, gender } = req.body;
+        const { firstName, lastName, email, password, photourl, age, skills, gender, about } = req.body;
 
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -21,7 +21,8 @@ const userRegister = async (req, res) => {
             photourl,
             age,
             skills,
-            gender
+            gender,
+            about
 
 
         })
@@ -44,7 +45,9 @@ const userLogin = async (req, res) => {
         const { email, password } = req.body;
         const userdata = await user.findOne({ email: email });
         if (!userdata) {
-            throw new Error("invalid cridentials")
+            res.status(400).json({
+                message: " invalid cridentials"
+            })
         }
         const ispasswordValid = await userdata.validatepassword(password)
 
@@ -55,14 +58,17 @@ const userLogin = async (req, res) => {
             res.cookie("token", token)
             res.status(200).json({
                 token,
-                message: "user login sucessfully"
+                message: "user login sucessfully",
+                user: userdata
             })
         } else {
-            throw new Error(" invalid cridentials")
+            res.status(400).json({
+                message: " invalid cridentials"
+            })
         }
 
     } catch (error) {
-        res.status(500).json({
+        res.status(400).json({
             message: "somthing went wrong!" + error
         })
     }

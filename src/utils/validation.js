@@ -17,14 +17,54 @@ const validateSignupData = (req) => {
 }
 
 
-const validateprofileEditData = (req) => {
-    const allowedFields = ["firstName", "lastName", "age", "gender", "skills", "photourl"];
-    const isAllowed = Object.keys(req.body).every(field => allowedFields.includes(field));
-    if (!isAllowed) {
-        throw new Error("Invalid fields in profile edit request");
+const validateprofileEditData = (input) => {
+    const data = input && input.body && typeof input.body === 'object' ? input.body : input;
+    if (!data || typeof data !== 'object') return false;
+
+    const allowedFields = ["firstName", "lastName", "age", "gender", "skills", "photourl", "about"];
+    const isAllowed = Object.keys(data).every(field => allowedFields.includes(field));
+    if (!isAllowed) return false;
+
+    if ('firstName' in data) {
+        if (typeof data.firstName !== 'string' || data.firstName.trim().length === 0) return false;
+    }
+    if ('lastName' in data) {
+        if (typeof data.lastName !== 'string' || data.lastName.trim().length === 0) return false;
+    }
+    if ('age' in data) {
+
+        const ageNum = Number(data.age);
+        if (!Number.isFinite(ageNum) || !Number.isInteger(ageNum)) return false;
+        if (ageNum < 13 || ageNum > 120) return false;
+    }
+    if ('skills' in data) {
+
+        const skills = data.skills;
+        if (Array.isArray(skills)) {
+            if (!skills.every(s => typeof s === 'string')) return false;
+        } else if (typeof skills === 'string') {
+
+        } else {
+            return false;
+        }
+    }
+    if ('gender' in data) {
+        if (typeof data.gender !== 'string') return false;
+        const g = data.gender.trim().toLowerCase();
+        const allowedGenders = ['male', 'female', 'other'];
+
+        if (g.length === 0 || g.length > 40) return false;
 
     }
+    if ('photourl' in data) {
+        if (typeof data.photourl !== 'string' || !validator.isURL(data.photourl + '')) return false;
+    }
+    if ('about' in data) {
+        if (typeof data.about !== 'string') return false;
+        if (data.about.length > 1000) return false;
+    }
 
+    return true;
 }
 
 const validateConnectionRequest = async (req) => {
@@ -36,7 +76,7 @@ const validateConnectionRequest = async (req) => {
     if (fromUserId.toString() === toUserId) {
         throw new Error("you cannot send request to yourself")
     }
-    // Check if a request already exists between the two users
+
     const existingRequest = await ConnectionRequestModel.findOne({
         $or: [
             {

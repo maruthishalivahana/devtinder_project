@@ -2,16 +2,14 @@ const User = require("../models/user")
 const { validateprofileEditData } = require("../utils/validation")
 const bcrypt = require("bcrypt")
 const profileEdit = async (req, res) => {
-    if (!validateprofileEditData(req)) {
-        return res.status(400).json({
-            message: "invalid data"
-        })
+    if (!validateprofileEditData(req.body)) {
+        return res.status(400).json({ message: "invalid data" });
     }
 
 
     try {
 
-        const { firstName, lastName, age, skills, gender, photourl } = req.body;
+        const { firstName, lastName, age, skills, gender, photourl, about } = req.body;
         const users = req.User;
         if (!users) {
             return res.status(401).json({
@@ -24,7 +22,8 @@ const profileEdit = async (req, res) => {
             age,
             skills,
             gender,
-            photourl
+            photourl,
+            about
         }, { new: true })
         updatedUser.save();
         res.status(200).json({
