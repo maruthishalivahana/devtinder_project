@@ -72,7 +72,8 @@ const userschema = new mongoose.Schema({
         timestamps: true
     })
 
-const JSON_WEB_TOKEN = "654183449a53ee7ba1a6e8f89f0cb3666e90ea8ac671c6c3a4614e69e4ee33f3"
+const JSON_WEB_TOKEN = process.env.JSON_WEB_TOKEN
+
 userschema.methods.getJWT = async function () {
     const token = await jwt.sign({
         id: this._id
