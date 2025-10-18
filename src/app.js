@@ -29,8 +29,7 @@ app.use('/', profileRouter)
 app.use('/', requestRouter)
 app.use("/", userRouter)
 
-
-const port = 3000;
+const port = process.env.PORT || 8080;
 const server = http.createServer(app)
 intializeSocket(server)
 

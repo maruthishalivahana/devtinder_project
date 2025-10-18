@@ -1,23 +1,23 @@
-# Use official Node.js LTS image
+# Use Node.js LTS as base image
 FROM node:18
 
-# Set working directory inside the container
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy only package files first (to leverage Docker layer caching)
+# Copy package files first (for better caching)
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy all source files into the container
+# Copy the rest of your source code
 COPY . .
 
-# Expose Cloud Run port (Cloud Run uses PORT env variable, default 8080)
+# Expose the port your app runs on
 EXPOSE 8080
 
-# Set environment variable for production
-ENV NODE_ENV=production
+# Cloud Run sets PORT env variable automatically; use it if available
+ENV PORT=8080
 
-# Start the application
+# Start the app
 CMD ["node", "server.js"]
