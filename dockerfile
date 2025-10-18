@@ -1,7 +1,7 @@
 # Use Node.js LTS as base image
 FROM node:18
 
-# Set the working directory inside the container
+
 WORKDIR /app
 
 # Copy package files first (for better caching)
