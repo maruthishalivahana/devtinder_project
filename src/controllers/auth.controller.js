@@ -38,7 +38,7 @@ const userRegister = async (req, res) => {
         })
     } catch (error) {
         res.status(400).json({
-            message: "somthing went wrong" + error
+            message: "somthing went wrong" + error.message
         })
     }
 }
