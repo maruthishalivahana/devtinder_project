@@ -1,23 +1,21 @@
-# Use Node.js LTS as base image
+# Use Node.js LTS
 FROM node:18
 
-
+# Set working directory inside container
 WORKDIR /app
 
-# Copy package files first (for better caching)
+# Copy package.json and package-lock.json first (for caching)
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of your source code
+# Copy all source code
 COPY . .
 
-# Expose the port your app runs on
+# Expose the port (Cloud Run uses PORT env)
 EXPOSE 8080
-
-# Cloud Run sets PORT env variable automatically; use it if available
 ENV PORT=8080
 
-# Start the app
+# Start the server
 CMD ["node", "server.js"]
