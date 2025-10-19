@@ -36,6 +36,7 @@ intializeSocket(server)
 connectDB().then(() => {
     console.log("Database connected successfully")
     server.listen(port, () => {
+
         console.log(`server running on port ${port}`)
     })
 }).catch((err) => {
