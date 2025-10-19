@@ -25,14 +25,16 @@ const userRegister = async (req, res) => {
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: true,        // Cloud Run uses HTTPS
-            sameSite: 'None',    // important for cross-origin
+            secure: true,          // must be true for HTTPS
+            sameSite: 'None',      // allows cross-origin
             maxAge: 24 * 60 * 60 * 1000
         });
 
+
+
         res.status(201).json({
             message: "User successfully registered",
-            data: savedUser
+            user: savedUser
         });
     } catch (error) {
         res.status(400).json({
@@ -51,19 +53,20 @@ const userLogin = async (req, res) => {
         }
 
         const isPasswordValid = await userdata.validatepassword(password);
-
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
 
         const token = await userdata.getJWT();
 
-        res.cookie("token", token, {
+
+        res.cookie('token', token, {
             httpOnly: true,
-            secure: true,
-            sameSite: 'None',
+            secure: true,          // must be true for HTTPS
+            sameSite: 'None',      // allows cross-origin
             maxAge: 24 * 60 * 60 * 1000
         });
+
 
         res.status(200).json({
             message: "User logged in successfully",
@@ -81,7 +84,7 @@ const userLogout = async (req, res) => {
         res.clearCookie("token", {
             httpOnly: true,
             secure: true,
-            sameSite: 'None'
+            sameSite: "None"
         });
         res.status(200).json({
             message: "User logged out successfully"

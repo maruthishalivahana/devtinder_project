@@ -6,11 +6,14 @@ const getRoomId = (userID, _id) => {
 };
 
 const initializeSocket = (server) => {
+    const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:5173', 'http://localhost:3000'];
+
     const io = socket(server, {
         cors: {
-            origin: "http://localhost:5173", // frontend URL
-            methods: ["GET", "POST"],
+            origin: allowedOrigins,
+            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             credentials: true,
+            allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
         },
     });
 
