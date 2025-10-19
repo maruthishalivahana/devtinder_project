@@ -1,17 +1,12 @@
-
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
 const user = require("../models/user");
 const jwt = require("jsonwebtoken");
-const { validateSignupData } = require("../utils/validation");
+
 const userRegister = async (req, res) => {
     try {
-
-        // validateSignupData(req)
         const { firstName, lastName, email, password, photourl, age, skills, gender, about } = req.body;
 
-
         const hashedPassword = await bcrypt.hash(password, 10);
-        console.log(hashedPassword)
 
         const newUser = new user({
             firstName,
@@ -23,79 +18,77 @@ const userRegister = async (req, res) => {
             skills,
             gender,
             about
-
-
-        })
+        });
 
         const savedUser = await newUser.save();
         const token = await savedUser.getJWT();
 
-        res.cookie("token", token)
-        res.status(201).json({
-            message: "user sucessfully registered",
-            data: savedUser
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,        // Cloud Run uses HTTPS
+            sameSite: 'None',    // important for cross-origin
+            maxAge: 24 * 60 * 60 * 1000
+        });
 
-        })
+        res.status(201).json({
+            message: "User successfully registered",
+            data: savedUser
+        });
     } catch (error) {
         res.status(400).json({
-            message: "somthing went wrong" + error.message
-        })
+            message: "Something went wrong: " + error.message
+        });
     }
-}
-
-
+};
 
 const userLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const userdata = await user.findOne({ email: email });
+        const userdata = await user.findOne({ email });
+
         if (!userdata) {
-            res.status(400).json({
-                message: " invalid cridentials"
-            })
-        }
-        const ispasswordValid = await userdata.validatepassword(password)
-
-        if (ispasswordValid) {
-
-            const token = await userdata.getJWT();
-
-            res.cookie("token", token)
-            res.status(200).json({
-                token,
-                message: "user login sucessfully",
-                user: userdata
-            })
-        } else {
-            res.status(400).json({
-                message: " invalid cridentials"
-            })
+            return res.status(400).json({ message: "Invalid credentials" });
         }
 
+        const isPasswordValid = await userdata.validatepassword(password);
+
+        if (!isPasswordValid) {
+            return res.status(400).json({ message: "Invalid credentials" });
+        }
+
+        const token = await userdata.getJWT();
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 24 * 60 * 60 * 1000
+        });
+
+        res.status(200).json({
+            message: "User logged in successfully",
+            user: userdata
+        });
     } catch (error) {
         res.status(400).json({
-            message: "somthing went wrong!" + error
-        })
+            message: "Something went wrong: " + error.message
+        });
     }
-}
-
+};
 
 const userLogout = async (req, res) => {
     try {
-
-        res.clearCookie("token")
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None'
+        });
         res.status(200).json({
-            message: "user logout sucessfully"
-        })
+            message: "User logged out successfully"
+        });
     } catch (error) {
-        res.status(500).json({
-            message: "somthing went wrong!" + error
-        })
+        res.status(500).json({ message: "Something went wrong: " + error.message });
     }
-}
+};
 
-module.exports = {
-    userRegister,
-    userLogin,
-    userLogout,
-}
+module.exports = { userRegister, userLogin, userLogout };

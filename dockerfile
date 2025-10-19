@@ -4,7 +4,7 @@ FROM node:18
 # Set working directory inside container
 WORKDIR /app
 
-# Copy package.json and package-lock.json first (for caching)
+# Copy package files first (for caching)
 COPY package*.json ./
 
 # Install dependencies
@@ -13,9 +13,9 @@ RUN npm install --legacy-peer-deps
 # Copy all source code
 COPY . .
 
-# Expose the port (Cloud Run uses PORT env)
+# Expose the Cloud Run port
 EXPOSE 8080
 ENV PORT=8080
 
-# Start the server
-CMD ["node", "server.js"]
+# Start from src/app.js
+CMD ["node", "src/app.js"]

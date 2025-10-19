@@ -6,7 +6,6 @@ const express = require("express");
 const app = express();
 const jwt = require("jsonwebtoken");
 const User = require("../models/user")
-const JSON_WEB_TOKEN = "654183449a53ee7ba1a6e8f89f0cb3666e90ea8ac671c6c3a4614e69e4ee33f3"
 const authMiddleware = async (req, res, next) => {
     try {
 
@@ -19,7 +18,7 @@ const authMiddleware = async (req, res, next) => {
             return res.status(401).send("please login first")
         }
         //if the token is present  verify the token
-        const verifyuser = jwt.verify(token, JSON_WEB_TOKEN)
+        const verifyuser = jwt.verify(token, process.env.JSON_WEB_TOKEN)
         // from the verified token get the userid
         const { id } = verifyuser
         // using the userid get the user from the database
